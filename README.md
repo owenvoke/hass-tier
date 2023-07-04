@@ -1,6 +1,6 @@
 # HASS Tier
 
-[![Latest Version][ico-version]][link-packagist]
+[![Latest Version][ico-version]][link-releases]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-github-actions]][link-github-actions]
 [![Buy us a tree][ico-treeware-gifting]][link-treeware-gifting]
@@ -74,7 +74,7 @@ Read more about Treeware at [treeware.earth][link-treeware].
 [ico-github-actions]: https://img.shields.io/github/actions/workflow/status/owenvoke/hass-tier/tests.yml?branch=main&style=flat-square
 [ico-treeware-gifting]: https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen?style=flat-square
 
-[link-packagist]: https://packagist.org/packages/owenvoke/hass-tier
+[link-releases]: https://github.com/owenvoke/hass-tier/releases
 [link-github-actions]: https://github.com/owenvoke/hass-tier/actions
 [link-treeware]: https://treeware.earth
 [link-treeware-gifting]: https://ecologi.com/owenvoke?gift-trees
