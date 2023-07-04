@@ -1,0 +1,11 @@
+{
+  "domain": "tier",
+  "name": "TIER",
+  "codeowners": ["@owenvoke"],
+  "config_flow": true,
+  "documentation": "https://github.com/owenvoke/hass-tier",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/owenvoke/hass-tier/issues",
+  "requirements": ["tier-sdk==0.1.1"],
+  "version": "0.1.0"
+}

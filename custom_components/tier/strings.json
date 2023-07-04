@@ -1,0 +1,21 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "TIER is already configured"
+        },
+        "error": {
+            "server_error": "Could not reach TIER."
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "api_token": "[%key:common::config_flow::data::api_token%]",
+                    "latitude": "[%key:common::config_flow::data::latitude%]",
+                    "longitude": "[%key:common::config_flow::data::longitude%]",
+                    "radius": "Radius (meters)",
+                    "scan_interval": "Scan interval (minutes)"
+                }
+            }
+        }
+    }
+}
