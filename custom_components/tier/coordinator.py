@@ -4,7 +4,7 @@ from datetime import timedelta
 import async_timeout
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from tier import VehicleCollection, TIER
+from tier import VehiclesCollection, TIER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
             update_interval=update_interval,
         )
 
-    async def _async_update_data(self) -> VehicleCollection:
+    async def _async_update_data(self) -> VehiclesCollection:
         async with async_timeout.timeout(5):
             return await self.hass.async_add_executor_job(
                 lambda: self._tier.vehicles.in_radius(
