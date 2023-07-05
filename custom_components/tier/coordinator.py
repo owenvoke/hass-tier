@@ -4,7 +4,7 @@ from datetime import timedelta
 import async_timeout
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from tier import VehiclesCollection, TIER
+from tier import TIER, Vehicle, VehiclesCollection
 
 _LOGGER = logging.getLogger(__name__)
 
