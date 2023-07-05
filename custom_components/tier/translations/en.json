@@ -4,6 +4,7 @@
             "already_configured": "TIER is already configured"
         },
         "error": {
+            "invalid_api_token": "Invalid API token.",
             "server_error": "Could not reach TIER."
         },
         "step": {
@@ -14,6 +15,15 @@
                     "longitude": "Longitude",
                     "radius": "Radius (meters)",
                     "scan_interval": "Scan interval (minutes)"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "scan_interval": "Change scan interval (minutes)"
                 }
             }
         }
