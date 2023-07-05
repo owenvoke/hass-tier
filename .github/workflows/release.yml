@@ -11,7 +11,7 @@ jobs:
     steps:
 
       - name: Create pre-release
-        if: startsWith(github.ref_name, 'v0.')
+        if: ${{ startsWith(github.ref_name, 'v0.') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -21,7 +21,7 @@ jobs:
             --generate-notes
 
       - name: Create a release
-        if: ! startsWith(github.ref_name, 'v0.')
+        if: ${{ ! startsWith(github.ref_name, 'v0.') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
