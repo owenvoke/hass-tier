@@ -13,9 +13,8 @@ from .const import (
     SENSOR_KEY_AVAILABLE_SCOOTERS,
     SENSOR_KEY_AVAILABLE_MOPEDS,
     SENSOR_KEY_AVAILABLE_BICYCLES,
+    DOMAIN,
 )
-
-DOMAIN = "tier"
 
 _LOGGER = logging.getLogger(__name__)
 
