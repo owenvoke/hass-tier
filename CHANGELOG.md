@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## Unreleased
 
+## v0.1.3 - 2023-07-21
+
+### Fixed
+- Resolve slow config loading time
+- Resolve invalid return type
+
 ## v0.1.2 - 2023-07-05
 
 ### Fixed
