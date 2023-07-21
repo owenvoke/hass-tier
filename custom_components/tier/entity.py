@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE
@@ -33,7 +35,7 @@ class TIERSensorEntity(CoordinatorEntity[TIERUpdateCoordinator], SensorEntity):
         self.entity_description = description
 
     @property
-    def native_value(self) -> str:
+    def native_value(self) -> str | int:
         if self.entity_description.key == SENSOR_KEY_AVAILABLE_BICYCLES:
             return sum(
                 1

@@ -14,13 +14,14 @@ from .const import (
     SENSOR_KEY_AVAILABLE_MOPEDS,
     SENSOR_KEY_AVAILABLE_BICYCLES,
     DOMAIN,
+    DEFAULT_SCAN_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
-SCAN_INTERVAL = timedelta(minutes=5)
+SCAN_INTERVAL = timedelta(minutes=DEFAULT_SCAN_INTERVAL)
 
 SENSORS: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
