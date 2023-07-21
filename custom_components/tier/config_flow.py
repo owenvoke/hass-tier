@@ -30,7 +30,7 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None) -> FlowResult:
         """Ask the user for an API token, site id, and a name for the system."""
         errors = {}
-        if user_input:
+        if user_input is not None:
             try:
                 vehicles = await self.hass.async_add_executor_job(
                     lambda: get_vehicles(
