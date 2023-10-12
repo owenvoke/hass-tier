@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## Unreleased
 
+## v0.1.5 - 2023-10-12
+
+### Fixed
+- Add missing translation string for updating radius
+
 ## v0.1.4 - 2023-10-12
 
 ### Added
