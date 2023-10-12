@@ -23,6 +23,7 @@
         "step": {
             "init": {
                 "data": {
+                    "radius": "Change radius (meters)",
                     "scan_interval": "Change scan interval (minutes)"
                 }
             }
