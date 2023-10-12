@@ -19,7 +19,7 @@ from tier import TIER, NotFoundException, UnauthorizedException
 
 import homeassistant.helpers.config_validation as cv
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
+from .const import DOMAIN, DEFAULT_RADIUS, DEFAULT_SCAN_INTERVAL
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -75,7 +75,7 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Inclusive(
                     CONF_LONGITUDE, "coordinates", default=self.hass.config.longitude
                 ): cv.longitude,
-                vol.Required(CONF_RADIUS): cv.positive_int,
+                vol.Required(CONF_RADIUS, default=DEFAULT_RADIUS): cv.positive_int,
             }
         )
 
@@ -126,6 +126,12 @@ class TIEROptionsFlowHandler(OptionsFlow):
                             CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
                         ),
                     ): vol.All(vol.Coerce(int), vol.Range(min=1)),
+                    vol.Required(
+                        CONF_RADIUS,
+                        default=self.config_entry.options.get(
+                            CONF_RADIUS, DEFAULT_RADIUS
+                        ),
+                    ): cv.positive_int,
                 }
             ),
         )

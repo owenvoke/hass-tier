@@ -4,6 +4,7 @@ from typing import Final
 DOMAIN: Final = "tier"
 
 DEFAULT_SCAN_INTERVAL: Final = 5
+DEFAULT_RADIUS: Final = 250
 
 SENSOR_KEY_AVAILABLE_BICYCLES = "available_bicycles"
 SENSOR_KEY_AVAILABLE_MOPEDS = "available_mopeds"
