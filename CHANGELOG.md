@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## Unreleased
 
+## v0.1.4 - 2023-10-12
+
+### Added
+- Add support for updating radius ([#1](https://github.com/owenvoke/hass-tier/pull/1))
+
 ## v0.1.3 - 2023-07-21
 
 ### Fixed
