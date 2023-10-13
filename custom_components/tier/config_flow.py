@@ -153,7 +153,7 @@ class TIEROptionsFlowHandler(OptionsFlow):
                             CONF_FILTER_NON_RENTABLE_VEHICLES,
                             DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
                         ),
-                    ): vol.Boolean(),
+                    ): cv.boolean,
                 }
             ),
         )
