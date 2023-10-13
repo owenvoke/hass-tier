@@ -147,7 +147,14 @@ class TIEROptionsFlowHandler(OptionsFlow):
                             CONF_RADIUS, DEFAULT_RADIUS
                         ),
                     ): cv.positive_int,
-                    vol.Required(
+                    vol.Optional(
+                        CONF_MINIMUM_BATTERY_LEVEL,
+                        default=self.config_entry.options.get(
+                            CONF_MINIMUM_BATTERY_LEVEL,
+                            DEFAULT_MINIMUM_BATTERY_LEVEL,
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+                    vol.Optional(
                         CONF_FILTER_NON_RENTABLE_VEHICLES,
                         default=self.config_entry.options.get(
                             CONF_FILTER_NON_RENTABLE_VEHICLES,
