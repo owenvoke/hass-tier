@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## Unreleased
 
+## v0.1.6 - 2023-10-13
+
+### Added
+- Add support to set minimum battery level ([#3](https://github.com/owenvoke/hass-tier/pull/3))
+- Add support to filter non-rentable vehicles ([#4](https://github.com/owenvoke/hass-tier/pull/4))
+
 ## v0.1.5 - 2023-10-12
 
 ### Fixed
