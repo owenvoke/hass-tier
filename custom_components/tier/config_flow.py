@@ -84,7 +84,7 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_LONGITUDE, "coordinates", default=self.hass.config.longitude
                 ): cv.longitude,
                 vol.Required(CONF_RADIUS, default=DEFAULT_RADIUS): cv.positive_int,
-                vol.Optional(
+                vol.Required(
                     CONF_MINIMUM_BATTERY_LEVEL, default=DEFAULT_MINIMUM_BATTERY_LEVEL
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 vol.Optional(
@@ -147,7 +147,7 @@ class TIEROptionsFlowHandler(OptionsFlow):
                             CONF_RADIUS, DEFAULT_RADIUS
                         ),
                     ): cv.positive_int,
-                    vol.Optional(
+                    vol.Required(
                         CONF_MINIMUM_BATTERY_LEVEL,
                         default=self.config_entry.options.get(
                             CONF_MINIMUM_BATTERY_LEVEL,
