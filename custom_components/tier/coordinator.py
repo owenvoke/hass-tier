@@ -49,7 +49,7 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
 
             filtered_vehicles: list[Vehicle] = []
 
-            for vehicle in vehicles.data:
+            for vehicle in vehicles["data"]:
                 if (
                     self._filter_non_rentable_vehicles
                     and vehicle["attributes"]["isRentable"] is False
@@ -59,6 +59,6 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
                 if vehicle["attributes"]["batteryLevel"] >= self._minimum_battery_level:
                     filtered_vehicles.append(vehicle)
 
-            vehicles.data = filtered_vehicles
+            vehicles["data"] = filtered_vehicles
 
             return vehicles
