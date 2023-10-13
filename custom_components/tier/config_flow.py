@@ -20,11 +20,13 @@ from tier import TIER, UnauthorizedException
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
+    CONF_FILTER_NON_RENTABLE_VEHICLES,
     CONF_MINIMUM_BATTERY_LEVEL,
-    DOMAIN,
+    DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
     DEFAULT_MINIMUM_BATTERY_LEVEL,
     DEFAULT_RADIUS,
     DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
 )
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
@@ -82,9 +84,13 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_LONGITUDE, "coordinates", default=self.hass.config.longitude
                 ): cv.longitude,
                 vol.Required(CONF_RADIUS, default=DEFAULT_RADIUS): cv.positive_int,
-                vol.Required(
+                vol.Optional(
                     CONF_MINIMUM_BATTERY_LEVEL, default=DEFAULT_MINIMUM_BATTERY_LEVEL
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+                vol.Optional(
+                    CONF_FILTER_NON_RENTABLE_VEHICLES,
+                    default=DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
+                ): cv.boolean,
             }
         )
 
@@ -141,6 +147,13 @@ class TIEROptionsFlowHandler(OptionsFlow):
                             CONF_RADIUS, DEFAULT_RADIUS
                         ),
                     ): cv.positive_int,
+                    vol.Required(
+                        CONF_FILTER_NON_RENTABLE_VEHICLES,
+                        default=self.config_entry.options.get(
+                            CONF_FILTER_NON_RENTABLE_VEHICLES,
+                            DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
+                        ),
+                    ): vol.Boolean(),
                 }
             ),
         )

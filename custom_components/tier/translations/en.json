@@ -15,7 +15,8 @@
                     "longitude": "Longitude",
                     "radius": "Radius (meters)",
                     "scan_interval": "Scan interval (minutes)",
-                    "minimum_battery_level": "Minimum battery level"
+                    "minimum_battery_level": "Minimum battery level",
+                    "filter_non_rentable_vehicles": "Filter non-rentable vehicles"
                 }
             }
         }
@@ -26,7 +27,8 @@
                 "data": {
                     "radius": "Change radius (meters)",
                     "scan_interval": "Change scan interval (minutes)",
-                    "minimum_battery_level": "Change minimum battery level"
+                    "minimum_battery_level": "Change minimum battery level",
+                    "filter_non_rentable_vehicles": "Filter non-rentable vehicles"
                 }
             }
         }

@@ -21,6 +21,7 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
         longitude: str,
         radius: int,
         minimum_battery_level: int,
+        filter_non_rentable_vehicles: bool,
         update_interval: timedelta,
     ) -> None:
         self._tier = TIER(api_token=api_token)
@@ -28,6 +29,7 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
         self._longitude = longitude
         self._radius = radius
         self._minimum_battery_level = minimum_battery_level
+        self._filter_non_rentable_vehicles = filter_non_rentable_vehicles
 
         """Initialize the UpdateCoordinator for TIER sensors."""
         super().__init__(
@@ -48,6 +50,12 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
             filtered_vehicles: list[Vehicle] = []
 
             for vehicle in vehicles.data:
+                if (
+                    self._filter_non_rentable_vehicles
+                    and vehicle["attributes"]["isRentable"] is False
+                ):
+                    continue
+
                 if vehicle["attributes"]["batteryLevel"] >= self._minimum_battery_level:
                     filtered_vehicles.append(vehicle)
 
