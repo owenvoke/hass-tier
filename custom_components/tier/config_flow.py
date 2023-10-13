@@ -15,11 +15,17 @@ from homeassistant.const import (
 )
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-from tier import TIER, NotFoundException, UnauthorizedException
+from tier import TIER, UnauthorizedException
 
 import homeassistant.helpers.config_validation as cv
 
-from .const import DOMAIN, DEFAULT_RADIUS, DEFAULT_SCAN_INTERVAL
+from .const import (
+    CONF_MINIMUM_BATTERY_LEVEL,
+    DOMAIN,
+    DEFAULT_MINIMUM_BATTERY_LEVEL,
+    DEFAULT_RADIUS,
+    DEFAULT_SCAN_INTERVAL,
+)
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -76,6 +82,9 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_LONGITUDE, "coordinates", default=self.hass.config.longitude
                 ): cv.longitude,
                 vol.Required(CONF_RADIUS, default=DEFAULT_RADIUS): cv.positive_int,
+                vol.Required(
+                    CONF_MINIMUM_BATTERY_LEVEL, default=DEFAULT_MINIMUM_BATTERY_LEVEL
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
             }
         )
 

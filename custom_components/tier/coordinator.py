@@ -20,12 +20,14 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
         latitude: str,
         longitude: str,
         radius: int,
+        minimum_battery_level: int,
         update_interval: timedelta,
     ) -> None:
         self._tier = TIER(api_token=api_token)
         self._latitude = latitude
         self._longitude = longitude
         self._radius = radius
+        self._minimum_battery_level = minimum_battery_level
 
         """Initialize the UpdateCoordinator for TIER sensors."""
         super().__init__(
@@ -37,8 +39,18 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
 
     async def _async_update_data(self) -> VehiclesCollection:
         async with async_timeout.timeout(5):
-            return await self.hass.async_add_executor_job(
+            vehicles: VehiclesCollection = await self.hass.async_add_executor_job(
                 lambda: self._tier.vehicles.in_radius(
                     self._latitude, self._longitude, self._radius
                 )
             )
+
+            filtered_vehicles: list[Vehicle] = []
+
+            for vehicle in vehicles.data:
+                if vehicle["attributes"]["batteryLevel"] >= self._minimum_battery_level:
+                    filtered_vehicles.append(vehicle)
+
+            vehicles.data = filtered_vehicles
+
+            return vehicles

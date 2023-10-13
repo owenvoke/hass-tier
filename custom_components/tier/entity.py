@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Mapping, Any
+
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE

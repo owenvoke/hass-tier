@@ -13,7 +13,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
+from .const import CONF_MINIMUM_BATTERY_LEVEL, DOMAIN, DEFAULT_SCAN_INTERVAL
 from .coordinator import TIERUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         latitude=config_entry.data[CONF_LATITUDE],
         longitude=config_entry.data[CONF_LONGITUDE],
         radius=config_entry.data[CONF_RADIUS],
+        minimum_battery_level=config_entry.data[CONF_MINIMUM_BATTERY_LEVEL],
         update_interval=timedelta(
             minutes=(config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
         ),
