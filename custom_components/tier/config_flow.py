@@ -19,6 +19,7 @@ from tier import TIER, UnauthorizedException
 
 import homeassistant.helpers.config_validation as cv
 
+from . import TIERUpdateCoordinator
 from .const import (
     CONF_FILTER_NON_RENTABLE_VEHICLES,
     CONF_MINIMUM_BATTERY_LEVEL,
@@ -119,15 +120,33 @@ class TIEROptionsFlowHandler(OptionsFlow):
         """Manage the options."""
         if user_input is not None:
             self.options.update(user_input)
-            coordinator = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            coordinator: TIERUpdateCoordinator = self.hass.data[DOMAIN][
+                self.config_entry.entry_id
+            ]
 
             update_interval = timedelta(
                 seconds=self.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
             )
+            radius = self.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+            minimum_battery_level = self.options.get(
+                CONF_MINIMUM_BATTERY_LEVEL, DEFAULT_MINIMUM_BATTERY_LEVEL
+            )
+            filter_non_rentable_vehicles = self.options.get(
+                CONF_FILTER_NON_RENTABLE_VEHICLES, DEFAULT_FILTER_NON_RENTABLE_VEHICLES
+            )
 
-            _LOGGER.debug("Updating coordinator, update_interval: %s", update_interval)
+            _LOGGER.debug(
+                "Updating coordinator, update_interval: %s, radius: %s, min battery level: %s, filter non-rentable: %s",
+                update_interval,
+                radius,
+                minimum_battery_level,
+                filter_non_rentable_vehicles,
+            )
 
             coordinator.update_interval = update_interval
+            coordinator._radius = radius
+            coordinator._minimum_battery_level = minimum_battery_level
+            coordinator._filter_non_rentable_vehicles = filter_non_rentable_vehicles
 
             return self.async_create_entry(title="", data=self.options)
 
