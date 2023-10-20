@@ -127,7 +127,7 @@ class TIEROptionsFlowHandler(OptionsFlow):
             update_interval = timedelta(
                 seconds=self.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
             )
-            radius = self.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+            radius = self.options.get(CONF_RADIUS, DEFAULT_RADIUS)
             minimum_battery_level = self.options.get(
                 CONF_MINIMUM_BATTERY_LEVEL, DEFAULT_MINIMUM_BATTERY_LEVEL
             )
