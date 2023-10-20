@@ -148,6 +148,8 @@ class TIEROptionsFlowHandler(OptionsFlow):
             coordinator._minimum_battery_level = minimum_battery_level
             coordinator._filter_non_rentable_vehicles = filter_non_rentable_vehicles
 
+            self.hass.data[DOMAIN][self.config_entry.entry_id] = coordinator
+
             return self.async_create_entry(title="", data=self.options)
 
         return self.async_show_form(
