@@ -19,6 +19,7 @@ from .const import (
     DOMAIN,
     DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
     DEFAULT_MINIMUM_BATTERY_LEVEL,
+    DEFAULT_RADIUS,
     DEFAULT_SCAN_INTERVAL,
 )
 from .coordinator import TIERUpdateCoordinator
@@ -35,7 +36,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         api_token=config_entry.data[CONF_API_TOKEN],
         latitude=config_entry.data[CONF_LATITUDE],
         longitude=config_entry.data[CONF_LONGITUDE],
-        radius=config_entry.data[CONF_RADIUS],
+        radius=config_entry.data.get(CONF_RADIUS, DEFAULT_RADIUS),
         minimum_battery_level=config_entry.data.get(
             CONF_MINIMUM_BATTERY_LEVEL, DEFAULT_MINIMUM_BATTERY_LEVEL
         ),

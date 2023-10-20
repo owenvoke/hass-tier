@@ -41,13 +41,22 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
 
     async def _async_update_data(self) -> VehiclesCollection:
         async with async_timeout.timeout(5):
+            _LOGGER.debug(
+                "Requesting vehicle data for lat=%s, lng=%s, radius=%s",
+                self._latitude,
+                self._longitude,
+                self._radius,
+            )
+
             vehicles: VehiclesCollection = await self.hass.async_add_executor_job(
                 lambda: self._tier.vehicles.in_radius(
-                    self._latitude, self._longitude, self._radius
+                    float(self._latitude), float(self._longitude), self._radius
                 )
             )
 
             filtered_vehicles: list[Vehicle] = []
+
+            _LOGGER.debug("Found %s vehicles", len(vehicles["data"]))
 
             for vehicle in vehicles["data"]:
                 if (
@@ -60,5 +69,7 @@ class TIERUpdateCoordinator(DataUpdateCoordinator[Vehicle]):
                     filtered_vehicles.append(vehicle)
 
             vehicles["data"] = filtered_vehicles
+
+            _LOGGER.debug("Found %s vehicles after filtering", len(vehicles["data"]))
 
             return vehicles
