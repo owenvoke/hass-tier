@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## Unreleased
 
+## v0.1.8 - 2023-10-13
+
+### Fixed
+- Ensure only the current config entry is removed
+- Ensure that updates to configuration are actually applied
+
 ## v0.1.7 - 2023-10-13
 
 ### Changed
