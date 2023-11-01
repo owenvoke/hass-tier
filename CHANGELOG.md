@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## Unreleased
 
-## v0.1.8 - 2023-10-13
+## v0.1.8 - 2023-11-01
 
 ### Fixed
 - Ensure only the current config entry is removed
