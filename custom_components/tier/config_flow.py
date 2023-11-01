@@ -46,7 +46,7 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
                         api_token=user_input[CONF_API_TOKEN],
                         latitude=user_input[CONF_LATITUDE],
                         longitude=user_input[CONF_LONGITUDE],
-                        radius=user_input[CONF_RADIUS],
+                        radius=DEFAULT_RADIUS,
                     )
                 )
                 if vehicles:
@@ -75,23 +75,12 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
         config_schema = vol.Schema(
             {
                 vol.Required(CONF_API_TOKEN): cv.string,
-                vol.Optional(
-                    CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
-                ): vol.All(vol.Coerce(int), vol.Range(min=1)),
                 vol.Inclusive(
                     CONF_LATITUDE, "coordinates", default=self.hass.config.latitude
                 ): cv.latitude,
                 vol.Inclusive(
                     CONF_LONGITUDE, "coordinates", default=self.hass.config.longitude
                 ): cv.longitude,
-                vol.Required(CONF_RADIUS, default=DEFAULT_RADIUS): cv.positive_int,
-                vol.Required(
-                    CONF_MINIMUM_BATTERY_LEVEL, default=DEFAULT_MINIMUM_BATTERY_LEVEL
-                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
-                vol.Optional(
-                    CONF_FILTER_NON_RENTABLE_VEHICLES,
-                    default=DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
-                ): cv.boolean,
             }
         )
 
@@ -144,46 +133,43 @@ class TIEROptionsFlowHandler(OptionsFlow):
             )
 
             coordinator.update_interval = update_interval
-            coordinator._radius = radius
-            coordinator._minimum_battery_level = minimum_battery_level
-            coordinator._filter_non_rentable_vehicles = filter_non_rentable_vehicles
 
             self.hass.data[DOMAIN][self.config_entry.entry_id] = coordinator
 
             return self.async_create_entry(title="", data=self.options)
 
+        options_schema = vol.Schema(
+            {
+                vol.Optional(
+                    CONF_SCAN_INTERVAL,
+                    default=self.config_entry.options.get(
+                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                    ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=1)),
+                vol.Required(
+                    CONF_RADIUS,
+                    default=self.config_entry.options.get(CONF_RADIUS, DEFAULT_RADIUS),
+                ): cv.positive_int,
+                vol.Required(
+                    CONF_MINIMUM_BATTERY_LEVEL,
+                    default=self.config_entry.options.get(
+                        CONF_MINIMUM_BATTERY_LEVEL,
+                        DEFAULT_MINIMUM_BATTERY_LEVEL,
+                    ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+                vol.Optional(
+                    CONF_FILTER_NON_RENTABLE_VEHICLES,
+                    default=self.config_entry.options.get(
+                        CONF_FILTER_NON_RENTABLE_VEHICLES,
+                        DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
+                    ),
+                ): cv.boolean,
+            }
+        )
+
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        CONF_SCAN_INTERVAL,
-                        default=self.config_entry.options.get(
-                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-                        ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=1)),
-                    vol.Required(
-                        CONF_RADIUS,
-                        default=self.config_entry.options.get(
-                            CONF_RADIUS, DEFAULT_RADIUS
-                        ),
-                    ): cv.positive_int,
-                    vol.Required(
-                        CONF_MINIMUM_BATTERY_LEVEL,
-                        default=self.config_entry.options.get(
-                            CONF_MINIMUM_BATTERY_LEVEL,
-                            DEFAULT_MINIMUM_BATTERY_LEVEL,
-                        ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
-                    vol.Optional(
-                        CONF_FILTER_NON_RENTABLE_VEHICLES,
-                        default=self.config_entry.options.get(
-                            CONF_FILTER_NON_RENTABLE_VEHICLES,
-                            DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
-                        ),
-                    ): cv.boolean,
-                }
-            ),
+            data_schema=options_schema,
         )
 
 

@@ -36,15 +36,17 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         api_token=config_entry.data[CONF_API_TOKEN],
         latitude=config_entry.data[CONF_LATITUDE],
         longitude=config_entry.data[CONF_LONGITUDE],
-        radius=config_entry.data.get(CONF_RADIUS, DEFAULT_RADIUS),
-        minimum_battery_level=config_entry.data.get(
+        radius=config_entry.options.get(CONF_RADIUS, DEFAULT_RADIUS),
+        minimum_battery_level=config_entry.options.get(
             CONF_MINIMUM_BATTERY_LEVEL, DEFAULT_MINIMUM_BATTERY_LEVEL
         ),
-        filter_non_rentable_vehicles=config_entry.data.get(
+        filter_non_rentable_vehicles=config_entry.options.get(
             CONF_FILTER_NON_RENTABLE_VEHICLES, DEFAULT_FILTER_NON_RENTABLE_VEHICLES
         ),
         update_interval=timedelta(
-            minutes=(config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
+            minutes=(
+                config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+            )
         ),
     )
 
