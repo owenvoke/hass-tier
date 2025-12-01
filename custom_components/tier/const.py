@@ -1,4 +1,5 @@
 """Constants for the TIER integration."""
+
 from typing import Final
 
 DOMAIN: Final = "tier"
