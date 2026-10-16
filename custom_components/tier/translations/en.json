@@ -1,32 +1,56 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "TIER is already configured"
-        },
-        "error": {
-            "invalid_api_token": "Invalid API token.",
-            "server_error": "Could not reach TIER."
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "api_token": "API token",
-                    "latitude": "Latitude",
-                    "longitude": "Longitude"
-                }
-            }
-        }
+  "config": {
+    "abort": {
+      "already_configured": "TIER is already configured for this location.",
+      "reauth_successful": "Re-authentication was successful."
     },
-    "options": {
-        "step": {
-            "init": {
-                "data": {
-                    "radius": "Change radius (meters)",
-                    "scan_interval": "Change scan interval (minutes)",
-                    "minimum_battery_level": "Change minimum battery level",
-                    "filter_non_rentable_vehicles": "Filter non-rentable vehicles"
-                }
-            }
+    "error": {
+      "cannot_connect": "Could not reach TIER.",
+      "invalid_auth": "Invalid API token.",
+      "unknown": "Unexpected error."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "api_token": "API token",
+          "latitude": "Latitude",
+          "longitude": "Longitude"
         }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate TIER",
+        "description": "The TIER API token is no longer valid. Enter a new one.",
+        "data": {
+          "api_token": "API token"
+        }
+      }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan interval (minutes)",
+          "radius": "Radius (metres)",
+          "minimum_battery_level": "Minimum battery level (%)",
+          "filter_non_rentable_vehicles": "Filter non-rentable vehicles"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "available_bicycles": { "name": "Available bicycles" },
+      "available_mopeds": { "name": "Available mopeds" },
+      "available_scooters": { "name": "Available scooters" }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": {
+      "message": "The TIER API token is no longer valid."
+    },
+    "update_failed": {
+      "message": "Could not fetch data from TIER: {error}"
+    }
+  }
 }

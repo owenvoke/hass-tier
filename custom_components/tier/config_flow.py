@@ -1,25 +1,31 @@
+"""Config flow for the TIER integration."""
+
 from __future__ import annotations
 
-from datetime import timedelta
-from hashlib import md5
 import logging
-import voluptuous as vol
+from collections.abc import Mapping
+from hashlib import md5
+from typing import Any
 
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
+import homeassistant.helpers.config_validation as cv
+import requests
+import voluptuous as vol
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithReload,
+)
 from homeassistant.const import (
     CONF_API_TOKEN,
-    CONF_SCAN_INTERVAL,
     CONF_LATITUDE,
     CONF_LONGITUDE,
     CONF_RADIUS,
+    CONF_SCAN_INTERVAL,
 )
-from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
-from tier import TIER, UnauthorizedException
+from homeassistant.core import HomeAssistant, callback
+from tier import TIER, TIERException, UnauthorizedException
 
-import homeassistant.helpers.config_validation as cv
-
-from . import TIERUpdateCoordinator
 from .const import (
     CONF_FILTER_NON_RENTABLE_VEHICLES,
     CONF_MINIMUM_BATTERY_LEVEL,
@@ -30,49 +36,76 @@ from .const import (
     DOMAIN,
 )
 
-_LOGGER: logging.Logger = logging.getLogger(__package__)
+_LOGGER = logging.getLogger(__name__)
+
+OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
+            vol.Coerce(int), vol.Range(min=1)
+        ),
+        vol.Required(CONF_RADIUS, default=DEFAULT_RADIUS): cv.positive_int,
+        vol.Required(
+            CONF_MINIMUM_BATTERY_LEVEL, default=DEFAULT_MINIMUM_BATTERY_LEVEL
+        ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+        vol.Required(
+            CONF_FILTER_NON_RENTABLE_VEHICLES,
+            default=DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
+        ): cv.boolean,
+    }
+)
+
+
+async def _async_validate(
+    hass: HomeAssistant, api_token: str, latitude: float, longitude: float
+) -> dict[str, str]:
+    """Check the token works by searching around the location."""
+    try:
+        await hass.async_add_executor_job(
+            TIER(api_token=api_token).vehicles.in_radius,
+            latitude,
+            longitude,
+            DEFAULT_RADIUS,
+        )
+    except UnauthorizedException:
+        return {"base": "invalid_auth"}
+    except (TIERException, requests.RequestException):
+        return {"base": "cannot_connect"}
+    except Exception:
+        _LOGGER.exception("Unexpected error validating the TIER API token")
+        return {"base": "unknown"}
+    return {}
+
+
+def _location_unique_id(latitude: float, longitude: float) -> str:
+    latitude_hash = md5(str(latitude).encode("utf-8")).hexdigest()
+    longitude_hash = md5(str(longitude).encode("utf-8")).hexdigest()
+    return f"tier_{latitude_hash}_{longitude_hash}"
 
 
 class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
-    """The configuration flow for an TIER system."""
+    """Config flow for TIER."""
 
-    async def async_step_user(self, user_input=None) -> FlowResult:
-        """Ask the user for an API token, site id, and a name for the system."""
-        errors = {}
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Ask for an API token and a location."""
+        errors: dict[str, str] = {}
         if user_input is not None:
-            try:
-                vehicles = await self.hass.async_add_executor_job(
-                    lambda: get_vehicles(
-                        api_token=user_input[CONF_API_TOKEN],
-                        latitude=user_input[CONF_LATITUDE],
-                        longitude=user_input[CONF_LONGITUDE],
-                        radius=DEFAULT_RADIUS,
-                    )
+            latitude = user_input[CONF_LATITUDE]
+            longitude = user_input[CONF_LONGITUDE]
+
+            await self.async_set_unique_id(_location_unique_id(latitude, longitude))
+            self._abort_if_unique_id_configured()
+
+            errors = await _async_validate(
+                self.hass, user_input[CONF_API_TOKEN], latitude, longitude
+            )
+            if not errors:
+                return self.async_create_entry(
+                    title=f"TIER ({latitude}, {longitude})", data=user_input
                 )
-                if vehicles:
-                    # Make sure we're not configuring the same device
-                    latitude_hash = md5(
-                        str(user_input[CONF_LATITUDE]).encode("utf-8")
-                    ).hexdigest()
-                    longitude_hash = md5(
-                        str(user_input[CONF_LONGITUDE]).encode("utf-8")
-                    ).hexdigest()
 
-                    await self.async_set_unique_id(
-                        f"tier_{latitude_hash}_{longitude_hash}"
-                    )
-                    self._abort_if_unique_id_configured()
-
-                    return self.async_create_entry(
-                        title=f"TIER ({user_input[CONF_LATITUDE]}, {user_input[CONF_LONGITUDE]})",
-                        data=user_input,
-                    )
-            except UnauthorizedException:
-                errors[CONF_API_TOKEN] = "invalid_api_token"
-            else:
-                errors[CONF_API_TOKEN] = "server_error"
-
-        config_schema = vol.Schema(
+        schema = vol.Schema(
             {
                 vol.Required(CONF_API_TOKEN): cv.string,
                 vol.Inclusive(
@@ -83,95 +116,63 @@ class TIERConfigFlow(ConfigFlow, domain=DOMAIN):
                 ): cv.longitude,
             }
         )
+        return self.async_show_form(
+            step_id="user",
+            data_schema=self.add_suggested_values_to_schema(schema, user_input),
+            errors=errors,
+        )
+
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
+        """Handle a rejected API token."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Ask for a new API token."""
+        errors: dict[str, str] = {}
+        entry = self._get_reauth_entry()
+
+        if user_input is not None:
+            errors = await _async_validate(
+                self.hass,
+                user_input[CONF_API_TOKEN],
+                entry.data[CONF_LATITUDE],
+                entry.data[CONF_LONGITUDE],
+            )
+            if not errors:
+                return self.async_update_reload_and_abort(
+                    entry, data_updates={CONF_API_TOKEN: user_input[CONF_API_TOKEN]}
+                )
 
         return self.async_show_form(
-            step_id="user", data_schema=config_schema, errors=errors
+            step_id="reauth_confirm",
+            data_schema=vol.Schema({vol.Required(CONF_API_TOKEN): cv.string}),
+            errors=errors,
         )
 
     @staticmethod
     @callback
-    def async_get_options_flow(
-        config_entry: ConfigEntry,
-    ) -> TIEROptionsFlowHandler:
-        return TIEROptionsFlowHandler(config_entry)
+    def async_get_options_flow(config_entry: ConfigEntry) -> TIEROptionsFlow:
+        """Return the options flow."""
+        return TIEROptionsFlow()
 
 
-class TIEROptionsFlowHandler(OptionsFlow):
-    """Config flow options handler for TIER."""
+class TIEROptionsFlow(OptionsFlowWithReload):
+    """Options for TIER."""
 
-    def __init__(self, config_entry: ConfigEntry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-        # Cast from MappingProxy to dict to allow update.
-        self.options = dict(config_entry.options)
-
-    async def async_step_init(self, user_input=None) -> FlowResult:
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
-            self.options.update(user_input)
-            coordinator: TIERUpdateCoordinator = self.hass.data[DOMAIN][
-                self.config_entry.entry_id
-            ]
-
-            update_interval = timedelta(
-                seconds=self.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-            )
-            radius = self.options.get(CONF_RADIUS, DEFAULT_RADIUS)
-            minimum_battery_level = self.options.get(
-                CONF_MINIMUM_BATTERY_LEVEL, DEFAULT_MINIMUM_BATTERY_LEVEL
-            )
-            filter_non_rentable_vehicles = self.options.get(
-                CONF_FILTER_NON_RENTABLE_VEHICLES, DEFAULT_FILTER_NON_RENTABLE_VEHICLES
-            )
-
-            _LOGGER.debug(
-                "Updating coordinator, update_interval: %s, radius: %s, min battery level: %s, filter non-rentable: %s",
-                update_interval,
-                radius,
-                minimum_battery_level,
-                filter_non_rentable_vehicles,
-            )
-
-            coordinator.update_interval = update_interval
-
-            self.hass.data[DOMAIN][self.config_entry.entry_id] = coordinator
-
-            return self.async_create_entry(title="", data=self.options)
-
-        options_schema = vol.Schema(
-            {
-                vol.Optional(
-                    CONF_SCAN_INTERVAL,
-                    default=self.config_entry.options.get(
-                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-                    ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1)),
-                vol.Required(
-                    CONF_RADIUS,
-                    default=self.config_entry.options.get(CONF_RADIUS, DEFAULT_RADIUS),
-                ): cv.positive_int,
-                vol.Required(
-                    CONF_MINIMUM_BATTERY_LEVEL,
-                    default=self.config_entry.options.get(
-                        CONF_MINIMUM_BATTERY_LEVEL,
-                        DEFAULT_MINIMUM_BATTERY_LEVEL,
-                    ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
-                vol.Optional(
-                    CONF_FILTER_NON_RENTABLE_VEHICLES,
-                    default=self.config_entry.options.get(
-                        CONF_FILTER_NON_RENTABLE_VEHICLES,
-                        DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
-                    ),
-                ): cv.boolean,
-            }
-        )
+            return self.async_create_entry(data=user_input)
 
         return self.async_show_form(
             step_id="init",
-            data_schema=options_schema,
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
+            ),
         )
-
-
-def get_vehicles(api_token: str, latitude: float, longitude: float, radius: int):
-    return TIER(api_token=api_token).vehicles.in_radius(latitude, longitude, radius)

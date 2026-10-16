@@ -1,79 +1,27 @@
-"""The TIER integration"""
+"""The TIER integration."""
 
-import logging
-from datetime import timedelta
+from __future__ import annotations
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    Platform,
-    CONF_API_TOKEN,
-    CONF_SCAN_INTERVAL,
-    CONF_LATITUDE,
-    CONF_LONGITUDE,
-    CONF_RADIUS,
-)
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import (
-    CONF_FILTER_NON_RENTABLE_VEHICLES,
-    CONF_MINIMUM_BATTERY_LEVEL,
-    DOMAIN,
-    DEFAULT_FILTER_NON_RENTABLE_VEHICLES,
-    DEFAULT_MINIMUM_BATTERY_LEVEL,
-    DEFAULT_RADIUS,
-    DEFAULT_SCAN_INTERVAL,
-)
-from .coordinator import TIERUpdateCoordinator
-
-_LOGGER = logging.getLogger(__name__)
+from .coordinator import TIERConfigEntry, TIERUpdateCoordinator
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    tier_coordinator = TIERUpdateCoordinator(
-        hass=hass,
-        name=config_entry.title,
-        api_token=config_entry.data[CONF_API_TOKEN],
-        latitude=config_entry.data[CONF_LATITUDE],
-        longitude=config_entry.data[CONF_LONGITUDE],
-        radius=config_entry.options.get(CONF_RADIUS, DEFAULT_RADIUS),
-        minimum_battery_level=config_entry.options.get(
-            CONF_MINIMUM_BATTERY_LEVEL, DEFAULT_MINIMUM_BATTERY_LEVEL
-        ),
-        filter_non_rentable_vehicles=config_entry.options.get(
-            CONF_FILTER_NON_RENTABLE_VEHICLES, DEFAULT_FILTER_NON_RENTABLE_VEHICLES
-        ),
-        update_interval=timedelta(
-            minutes=(
-                config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-            )
-        ),
-    )
+async def async_setup_entry(hass: HomeAssistant, entry: TIERConfigEntry) -> bool:
+    """Set up TIER from a config entry."""
+    coordinator = TIERUpdateCoordinator(hass, entry)
+    await coordinator.async_config_entry_first_refresh()
 
-    await tier_coordinator.async_config_entry_first_refresh()
+    entry.runtime_data = coordinator
 
-    hass.data.setdefault(DOMAIN, {})[config_entry.entry_id] = tier_coordinator
-
-    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
-
-    config_entry.async_on_unload(
-        config_entry.add_update_listener(options_update_listener)
-    )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: TIERConfigEntry) -> bool:
     """Unload a config entry."""
-    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        hass.data[DOMAIN].pop(entry.entry_id)
-
-    return unload_ok
-
-
-async def options_update_listener(
-    hass: HomeAssistant, config_entry: ConfigEntry
-) -> None:
-    """Handle options update."""
-    await hass.config_entries.async_reload(config_entry.entry_id)
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

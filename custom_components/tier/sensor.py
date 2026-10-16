@@ -1,53 +1,56 @@
-import logging
-from datetime import timedelta
+"""Sensors for TIER."""
 
-from homeassistant.components.sensor import SensorEntityDescription
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
+from __future__ import annotations
+
+from homeassistant.components.sensor import SensorEntityDescription, SensorStateClass
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from . import TIERUpdateCoordinator
-from .entity import TIERSensorEntity
 from .const import (
-    SENSOR_KEY_AVAILABLE_SCOOTERS,
-    SENSOR_KEY_AVAILABLE_MOPEDS,
     SENSOR_KEY_AVAILABLE_BICYCLES,
-    DOMAIN,
-    DEFAULT_SCAN_INTERVAL,
+    SENSOR_KEY_AVAILABLE_MOPEDS,
+    SENSOR_KEY_AVAILABLE_SCOOTERS,
 )
+from .coordinator import TIERConfigEntry
+from .entity import TIERSensorEntity
 
-_LOGGER = logging.getLogger(__name__)
+PARALLEL_UPDATES = 0
 
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+VEHICLE_TYPES: dict[str, str] = {
+    SENSOR_KEY_AVAILABLE_BICYCLES: "ebicycle",
+    SENSOR_KEY_AVAILABLE_MOPEDS: "emoped",
+    SENSOR_KEY_AVAILABLE_SCOOTERS: "escooter",
+}
 
-SCAN_INTERVAL = timedelta(minutes=DEFAULT_SCAN_INTERVAL)
-
-SENSORS: tuple[SensorEntityDescription, ...] = (
+SENSORS: tuple[SensorEntityDescription, ...] = tuple(
     SensorEntityDescription(
-        key=SENSOR_KEY_AVAILABLE_BICYCLES,
-        name="Available Bicycles",
-        icon="mdi:bicycle",
-    ),
-    SensorEntityDescription(
-        key=SENSOR_KEY_AVAILABLE_MOPEDS,
-        name="Available Mopeds",
-        icon="mdi:moped",
-    ),
-    SensorEntityDescription(
-        key=SENSOR_KEY_AVAILABLE_SCOOTERS,
-        name="Available Scooters",
-        icon="mdi:scooter",
-    ),
+        key=key, translation_key=key, state_class=SensorStateClass.MEASUREMENT
+    )
+    for key in VEHICLE_TYPES
 )
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: TIERConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up all sensors for this entry."""
-    coordinator: TIERUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-
+    """Set up the sensors."""
     async_add_entities(
-        TIERSensorEntity(coordinator, entry, description) for description in SENSORS
+        TIERVehicleCountSensor(entry.runtime_data, entry, description)
+        for description in SENSORS
     )
+
+
+class TIERVehicleCountSensor(TIERSensorEntity):
+    """The number of available vehicles of one type."""
+
+    @property
+    def native_value(self) -> int:
+        """Return how many vehicles of this type are available."""
+        vehicle_type = VEHICLE_TYPES[self.entity_description.key]
+        return sum(
+            1
+            for vehicle in self.coordinator.data
+            if vehicle["attributes"]["vehicleType"] == vehicle_type
+        )

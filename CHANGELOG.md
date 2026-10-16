@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com), and this 
 
 ## Unreleased
 
+### Added
+- Re-authentication when the API token stops working
+
+### Changed
+- Require Home Assistant 2026.9 or later
+- Vehicle counts are recorded as measurements, so they appear in long-term statistics
+- Sensor names are now translated and use sentence case
+
+### Fixed
+- Network errors in the config flow showed an unknown error
+- Update failures are now reported to Home Assistant, which retries them
+- The options flow used a deprecated API that no longer works on current Home Assistant
+
 ## v0.1.8 - 2023-11-01
 
 ### Fixed

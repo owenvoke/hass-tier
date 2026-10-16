@@ -4,8 +4,10 @@
   "codeowners": ["@owenvoke"],
   "config_flow": true,
   "documentation": "https://github.com/owenvoke/hass-tier",
+  "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/owenvoke/hass-tier/issues",
+  "loggers": ["tier"],
   "requirements": ["tier-sdk==0.1.2"],
   "version": "0.0.0"
 }

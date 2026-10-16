@@ -1,0 +1,9 @@
+{
+  "entity": {
+    "sensor": {
+      "available_bicycles": { "default": "mdi:bicycle" },
+      "available_mopeds": { "default": "mdi:moped" },
+      "available_scooters": { "default": "mdi:scooter" }
+    }
+  }
+}
